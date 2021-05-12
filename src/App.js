@@ -32,7 +32,7 @@ const splitIntoTopLevelGroupsOfSize = (questionsList, size) => {
 	return splitQuestions;
 };
 
-const DisplayQuestionInstance = ({ questionInstance }) => {
+const DisplayQuestionInstance = ({ questionInstance, nextStep }) => {
 	return (
 		<>
 			<Text
@@ -42,7 +42,12 @@ const DisplayQuestionInstance = ({ questionInstance }) => {
 			<br />
 			{questionInstance.subQuestions
 				? questionInstance.subQuestions.map((subq) => (
-						<DisplayQuestionInstance questionInstance={subq} />
+						<Step
+							questionInstances={[subq]}
+							step={"subq" + subq.name}
+							backName="step_0"
+							nextName={nextStep}
+						/>
 				  ))
 				: null}
 		</>
@@ -51,16 +56,30 @@ const DisplayQuestionInstance = ({ questionInstance }) => {
 
 const Step = ({ questionInstances, stepName, nextName, backName }) => {
 	const { back, next } = useMultistepApi();
+	const [actualNext, setActualNext] = useState(nextName);
 	return (
 		<Multistep.Step
 			step={stepName}
-			next={nextName || null}
+			next={actualNext}
 			previous={backName || null}
 		>
+			<pre>next: {actualNext}</pre>
 			{questionInstances.map((question) => (
 				<DisplayQuestionInstance questionInstance={question} />
 			))}
 			<br />
+			<button
+				type="button"
+				onClick={() => {
+					setActualNext("INVALID");
+					setTimeout(() => {
+						console.log(`Setting actual next`);
+						setActualNext(nextName);
+					}, 3000);
+				}}
+			>
+				Change Next
+			</button>
 			{backName ? (
 				<button type="button" onClick={back}>
 					Back
@@ -78,7 +97,7 @@ const Step = ({ questionInstances, stepName, nextName, backName }) => {
 const App = () => {
 	const questionInstances = [
 		{
-			name: "tl1",
+			name: "generalInformation.tl1",
 			prompt: "Top Level (1)",
 		},
 		{
@@ -91,7 +110,7 @@ const App = () => {
 			],
 		},
 		{
-			name: "tl3",
+			name: "tl1",
 			prompt: "Top Level (3)",
 		},
 		{
